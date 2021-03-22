@@ -154,3 +154,13 @@ for p = 1:length(n_participants)
 
 
 end
+
+
+%% make cooler plots
+% all_res_subsampled:
+%   first 
+
+all_res_subsampled{1}
+
+
+
