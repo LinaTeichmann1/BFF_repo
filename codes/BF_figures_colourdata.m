@@ -10,6 +10,16 @@ addpath(genpath('./local_functions'));
 load('../data_colour/ds_stacked_realcolour.mat')
 load('../data_colour/significant_timepoints_realcolour_new.mat')
 
+
+%% colormaps
+tv = ds_stacked_realcolour.a.fdim.values{1}*1000;
+
+num_cols = length(tv); 
+
+co_bwr= getPyPlot_cMap('bwr_r',num_cols);
+
+
+
 %% ***********************************************************
 % ************* Figure 2: colour results *********
 % ************************************************************
@@ -63,10 +73,8 @@ for t = 1:length(tv)
     hold on;
 
 end
-a.YScale = 'log';
-a.XLim = [tv(1),tv(end)];
-a.YLim = [10^-exponential_minmax, 10^exponential_minmax];
-a.YTick = [10^(-exponential_minmax), 10^(-exponential_minmax/2),10^0, 10^(exponential_minmax/2),10^exponential_minmax];
+set(a,'YScale','log','XLim',[tv(1),tv(end)], ...
+        'YLim',[1e-10 1e10],'YTick',10.^(-10:5:10))
 xlabel('time (ms)')
 ylabel('BF (log scale)')
 a.FontSize = 14;
@@ -88,7 +96,7 @@ oneway=1;
 limits=5;
 null_line_width=1.5;
 x_ax_on=0;
-prior_width = 1/2;
+prior_width = 1/sqrt(2);
 plot_cauchy(ax,null_int_start,oneway,limits,null_line_width,co,x_ax_on,prior_width)
 
 % SAVE ALL 
@@ -100,7 +108,7 @@ f.Position=[f.Position(1:2) 250 200];
 ax = axes();
 null_line_width = 4;
 x_ax_on = 1;
-plot_cauchy(ax,null_int_start,oneway,limits,null_line_width,co,x_ax_on,prior_width)
+plot_cauchy(ax,null_int_start,oneway,limits,null_line_width,co_bwr,x_ax_on,prior_width)
 hold on
 saveas(gcf, '../figures/figure_prior_only.png')
 
@@ -109,14 +117,71 @@ saveas(gcf, '../figures/figure_prior_only.png')
 % ************************* Figure 3 *************************
 % ************************************************************
 
-% make a plot comparing different null intervals
-
+% make a plot comparing different prior width
+% run the BFs
 tv = ds_stacked_realcolour.a.fdim.values{1}*1000;
-% tv = tv(ds_stacked_realcolour.a.fdim.values{1}>=0 & ds_stacked_realcolour.a.fdim.values{1}<=200);
-co= getPyPlot_cMap('Set2',9);
+co= getPyPlot_cMap('gray',5);
+
+X = ds_stacked_realcolour.samples';
+prior_widths = {'ultrawide';'wide';'medium'};
+bfs_toplot=[];
+for i = 1:3
+    bfs_toplot{i} =bayesfactor_R_wrapper(X,'args',['mu=0.5,rscale="' prior_widths{i} '",nullInterval=c(0.5,Inf)'],'returnindex',1);
+end
+
+f=figure(3);clf
+f.Position=[f.Position(1:2) 1000 400];f.Resize='off';f.PaperPositionMode='auto';f.Color='w';
+top = 300; bot = 60;
+a=axes('Units','Pixels','Position',[55 bot 800 top]);
+
+hold on
+markers=['-d';'-s';'-o';'-^'];
+null_ints_titles={'ultrawide (r = 1.414)','wide (r = 1)','medium (r = 0.707)'};
+for i = 1:3
+    stem(a,tv,bfs_toplot{i},markers(i,:),'basevalue',1,'Color','k','LineWidth',0.01,'MarkerSize',8)
+    hold on
+end
+
+for i = 1:3
+    p(i)=plot(tv,bfs_toplot{i},markers(i,:),'MarkerFaceColor',co(i+1,1:3),'MarkerEdgeColor',co(i,1:3),'LineStyle','None','MarkerSize',8)
+end
+legend(p,null_ints_titles,'Location','NE','FontSize',24,'Box','off')
+
+
+set(a,'YScale','log','XLim',[tv(1),tv(end)], ...
+        'YLim',[1e-10 1e10],'YTick',10.^(-10:5:10))
+a.XLabel.String=('time (ms)');
+a.YLabel.String=('BF (log scale)');
+a.FontSize = 20;
+
+
+% add the prior plots to the right
+size_tiny_plots = (top-bot)/3+8;
+oneway=1;
+limits=5;
+null_line_width=1;
+x_ax_on=0;
+null_int_start=0.5;
+widths = [sqrt(2),1,1/sqrt(2)];
+for i = 1:3
+    a=axes('Units','Pixels','Position',[900 top-(i-1)*size_tiny_plots-18*i size_tiny_plots size_tiny_plots ],'Color',[co(i+1,1:3),0.5]);
+    prior_width=widths(i);
+    plot_cauchy(a,null_int_start,oneway,limits,null_line_width,co_bwr,x_ax_on,prior_width)
+end
+
+
+set(gcf, 'InvertHardCopy', 'off'); 
+saveas(gcf, '../figures/figure3.png')
+
+%% ***********************************************************
+% ************************* Figure 5 *************************
+% ************************************************************
+
+% make a plot comparing different null intervals
+tv = ds_stacked_realcolour.a.fdim.values{1}*1000;
+co= getPyPlot_cMap('gray',5);
 
 % run the BFs
-% X = (ds_stacked_realcolour.samples(:,ds_stacked_realcolour.a.fdim.values{1}>=0 & ds_stacked_realcolour.a.fdim.values{1}<=200))';
 X = ds_stacked_realcolour.samples';
 null_ints = [0,0.2,0.5,0.8];
 for i = 1:4
@@ -125,13 +190,14 @@ end
 
 
 f=figure(2);clf
-f.Position = [f.Position(1:2) 1200 400];
-exponential_minmax=10;
+f.Position=[f.Position(1:2) 1000 400];f.Resize='off';f.PaperPositionMode='auto';f.Color='w';
+top = 300; bot = 60;
+a=axes('Units','Pixels','Position',[55 bot 800 top]);
 
 hold on
 a=gca;
 markers=['-d';'-s';'-o';'-^'];
-null_ints_titles={'none','small (0.2)','medium (0.5)','large (0.8)'};
+null_ints_titles={'[0, Inf]','[0.2, Inf]','[0.5, Inf]','[0.8, Inf]'};
 for i = 1:4
     stem(a,tv,bfs_toplot{i},markers(i,:),'basevalue',1,'Color','k','LineWidth',0.01,'MarkerSize',8)
     hold on
@@ -142,96 +208,55 @@ for i = 1:4
 end
 legend(p,null_ints_titles,'Location','NE','FontSize',24,'Box','off')
 
-
-a.YScale = 'log';
-a.XLim = [tv(1),tv(end)];
-a.YLim = [10^-exponential_minmax, 10^exponential_minmax];
-% a.YTick = [10^(-exponential_minmax), 10^(-exponential_minmax/2),10^0, 10^(exponential_minmax/2),10^exponential_minmax];
+set(a,'YScale','log','XLim',[tv(1),tv(end)], ...
+        'YLim',[1e-10 1e10],'YTick',10.^(-10:5:10))
+    
 a.XLabel.String=('time (ms)');
-a.YLabel.String=('BF (log scale)');
+a.YLabel.String=('BF (log)');
 a.FontSize = 20;
 
-saveas(gcf, '../figures/figure3.png')
-
-
-%% ***********************************************************
-% ************************* Figure 4 *************************
-% ************************************************************
-
-% make a plot comparing different prior width
-% run the BFs
-tv = ds_stacked_realcolour.a.fdim.values{1}*1000;
-% tv = tv(ds_stacked_realcolour.a.fdim.values{1}>=0 & ds_stacked_realcolour.a.fdim.values{1}<=200);
-co= getPyPlot_cMap('Set2',9);
-
-% X = (ds_stacked_realcolour.samples(:,ds_stacked_realcolour.a.fdim.values{1}>=0 & ds_stacked_realcolour.a.fdim.values{1}<=200))';
-X = ds_stacked_realcolour.samples';
-
-prior_widths = {'ultrawide';'wide';'medium'};
-
-bfs_toplot=[];
-for i = 1:3
-    bfs_toplot{i} =bayesfactor_R_wrapper(X,'args',['mu=0.5,rscale="' prior_widths{i} '",nullInterval=c(0.5,Inf)'],'returnindex',1);
+% add the prior plots to the right
+size_tiny_plots = (top-bot)/4+8;
+oneway=1;
+limits=5;
+null_line_width=1;
+x_ax_on=0;
+prior_width = 1/sqrt(2);
+for i = 1:4
+    a=axes('Units','Pixels','Position',[900 top-(i-1)*size_tiny_plots-9*i size_tiny_plots size_tiny_plots ],'Color',[co(i,1:3),0.5]);
+    null_int_start=null_ints(i);
+    plot_cauchy(a,null_int_start,oneway,limits,null_line_width,co_bwr,x_ax_on,prior_width)
 end
-
-
-f=figure(3);clf
-f.Position = [f.Position(1:2) 1200 400];
-exponential_minmax=10;
-
-hold on
-a=gca;
-markers=['-d';'-s';'-o';'-^'];
-null_ints_titles={'ultrawide (1.414)','wide (1)','medium (0.707)'};
-for i = 1:3
-    stem(a,tv,bfs_toplot{i},markers(i,:),'basevalue',1,'Color','k','LineWidth',0.01,'MarkerSize',8)
-    hold on
-end
-
-for i = 1:3
-    p(i)=plot(tv,bfs_toplot{i},markers(i,:),'MarkerFaceColor',co(i,1:3),'MarkerEdgeColor',co(i,1:3),'LineStyle','None','MarkerSize',8)
-end
-legend(p,null_ints_titles,'Location','NE','FontSize',24,'Box','off')
-
-
-a.YScale = 'log';
-a.XLim = [tv(1),tv(end)];
-a.YLim = [10^-exponential_minmax, 10^exponential_minmax];
-a.YTick = [10^(-exponential_minmax), 10^(-exponential_minmax/2),10^0, 10^(exponential_minmax/2),10^exponential_minmax];
-a.XLabel.String=('time (ms)');
-a.YLabel.String=('BF (log scale)');
-a.FontSize = 20;
-
-saveas(gcf, '../figures/figure4.png')
+set(gcf, 'InvertHardCopy', 'off'); 
+saveas(gcf, '../figures/figure5.png')
 
 
 
-
-%% local functions
+%% helper functions
 function plot_cauchy(ax,null_int_start,oneway,limits,null_line_width,co,x_ax_on,prior_width)
 
-pd_cauchy = makedist('Stable','alpha',1,'beta',0,'gam',prior_width,'delta',0);
+    pd_cauchy = makedist('Stable','alpha',1,'beta',0,'gam',prior_width,'delta',0);
 
-x = -limits:.1:limits;
-pdf_cauchy = pdf(pd_cauchy,x);
-hold on
-if oneway==1
-    area(x(x>=0),pdf_cauchy(x>=0),'FaceColor',[1,1,1])
-else
-    area(x,pdf_cauchy,'FaceColor',[1,1,1])
-end
-area(x(x>=null_int_start),pdf_cauchy(x>=null_int_start),'FaceColor',co(end,1:3))
-ax.XLim=[x(1), x(end)]; ax.YLim = [0,0.5]
-if x_ax_on==0
-    ax.XTick=[];
-else
-    xlabel('effect size (\delta)')
-    ax.XTick = -limits:limits;
-    ax.FontSize=14;
-end
-ax.YTick=[];
-ax.Box='on';
-stem(0,max(pdf_cauchy),'.m','Color', co(1,1:3), 'LineWidth',null_line_width,'MarkerSize',1)
+    x = -limits:.1:limits;
+    pdf_cauchy = pdf(pd_cauchy,x);
+    hold on
+    if oneway==1
+        area(x(x>=0),pdf_cauchy(x>=0),'FaceColor',[1,1,1])
+    else
+        area(x,pdf_cauchy,'FaceColor',[1,1,1])
+    end
+    area(x(x>=null_int_start),pdf_cauchy(x>=null_int_start),'FaceColor',co(end,1:3))
+    ax.XLim=[x(1), x(end)]; ax.YLim = [0,0.5];
+    if x_ax_on==0
+        ax.XTick=[];
+    else
+        xlabel('effect size (\delta)')
+        ax.XTick = -limits:limits;
+        ax.FontSize=14;
+    end
+    ax.YTick=[];
+    ax.Box='on';
+    stem(0,max(pdf_cauchy),'.m','Color', co(1,1:3), 'LineWidth',null_line_width,'MarkerSize',1)
 
 
 end

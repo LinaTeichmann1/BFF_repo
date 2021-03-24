@@ -1,4 +1,9 @@
-clearvars;
+%% subsampling from the data
+% THIS IS THE RESULT: all_res_subsampled, sig & bfs (saved as subsampling_results.mat):
+%   first index is for different number of participants (6, 9, 12, 15, 18) 
+%   second index is for different number of trials (100%, 75%, 50%, 25%, 10%)
+
+clearvars;rng(1);
 addpath(genpath('/System/Volumes/Data/misc/data16/teichmanna2/Toolboxes/CoSMoMVPA'))
 
 participants = [1:6,8:10,12:20];
@@ -6,8 +11,6 @@ res75 = {};res50 = {};res25 = {};res10 = {};
 for p = participants
     load(['../data_colour/cosmofiles/P' num2str(p) '_ds'])
     dsa = ds_nopca;
-
-
 
     % colour-decoding for shapes == real colour decoding
     dsa = cosmo_slice(dsa,dsa.sa.trialtype==1);
@@ -76,7 +79,6 @@ for p = 1:length(n_participants)
     end
 end
 
-
 sig = [];bfs=[];
 for p = 1:length(n_participants)
     for i  = 1:length(all_res)
@@ -96,71 +98,8 @@ for p = 1:length(n_participants)
     end
 end
 
-
 save('subsampling_results.mat','all_res_subsampled','sig','bfs')
 
-%% plot
-tv = ds_stacked_realcolour.a.fdim.values{1}*1000;
-num_cols = length(tv); 
-co= getPyPlot_cMap('bwr_r',num_cols);
-title_names = flipud([{'160 trials (10%)'};{'400 trials (25%)'};{'800 trials (50%)'};{'1200 trials (75%)'};{'1600 trials (100%)'}]);
-
-for p = 1:length(n_participants)
-    figure(p);clf;
-    for i  = 1:5
-        a=subplot(5,1,i);hold on
-        exponential_minmax=10;
-        val_col_map = logspace(-exponential_minmax,exponential_minmax,num_cols);
-        plot(tv(find(sig{p}{i})),repmat(10^9,1,length(find(sig{p}{i}))),'k*'); hold on
-
-        for t = 1:length(tv)
-            [~,idx] = min(abs(val_col_map-bfs{p}{i}(t)));  
-            st = stem(a,tv(t),bfs{p}{i}(t),'Clipping','off','basevalue',1,'Color','k','MarkerFaceColor',co(idx,1:3),'MarkerEdgeColor','k','LineWidth',1,'MarkerSize',6);
-            hold on;
-        end
-        a.YScale = 'log';
-        a.XLim = [tv(1),tv(end)];
-        a.YLim = [10^-exponential_minmax, 10^exponential_minmax];
-        a.YTick = [10^(-exponential_minmax), 10^(-exponential_minmax/2),10^0, 10^(exponential_minmax/2),10^exponential_minmax];
-        xlabel('time (ms)')
-        ylabel('BF (log scale)')
-        a.FontSize = 14;
-        title([title_names{i} ', ' num2str(n_participants(p)) ' participants'])
-        
-        ax = axes();
-        ax.Position = a.Position;
-        ax.Position(4) = a.Position(4)/4;
-        mu = mean(all_res_subsampled{p}{i}.samples*100);
-        se = std(all_res_subsampled{p}{i}.samples*100)./sqrt(size(all_res_subsampled{p}{i}.samples,1));
-        fill([tv fliplr(tv)],[mu-se fliplr(mu+se)],[102,0,204]/255,...
-            'FaceAlpha',.2,'LineStyle','none');hold on
-        plot(tv,mu,'k-','LineWidth',2,'Color',[102,0,204]/255,'Marker','None');
-        plot(tv,tv*0+50,'k--')
-
-
-        ax.YColor=[102,0,204]/255;
-        ax.YAxisLocation='right';
-        ax.YLabel.String = 'Accuracy (%)';
-        ax.Color = 'none';
-        ax.Box = 'off';
-        ax.XColor='none';
-        ax.YLim = [48,60];
-    end
-    
-    f = gcf();
-    f.Position = [-1500 230 1070 1310];
-    drawnow()
-    saveas(f,['../figures/subsampling_n' num2str(n_participants(p)) '.png'])
-
-
-end
-
-
-%% make cooler plots
-% all_res_subsampled:
-%   first 
-
-all_res_subsampled{1}
 
 
 
