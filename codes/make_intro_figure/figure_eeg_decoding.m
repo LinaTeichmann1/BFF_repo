@@ -1,13 +1,18 @@
-%% Make the intro figure based on tijis figure
+%% Introduction figure showing MVPA for time-series data
+%   This figure is based on simulated data and has been adapted from:
+%   Carlson, Grootswagers, & Robinson, 2020,
+%   https://arxiv.org/pdf/1905.04820.pdf 
+%   April 2021
 
+%% setup
 clearvars;
 
 f=figure(1);clf
 f.Position=[0 80 500 635];f.Resize='off';f.PaperPositionMode='auto';f.Color='w';
 left = 40;
 
-% bottom: decoding over time
-a=axes('Units','Pixels','Position',[left 30 450 140])
+%% bottom: decoding over time
+a=axes('Units','Pixels','Position',[left 30 450 140]);
 m = load('cleardecodingdata.mat');xdata = m.xdata;ydata=m.ydata*100;
 plot(xdata,ydata,'k','LineWidth',2);hold on
 plot(xdata,50+0*ydata,'k:','LineWidth',2)
@@ -21,10 +26,7 @@ ylabel('classification accuracy (%)')
 text(0,.55,'stimulus onset','Rotation',90,'VerticalAlignment','top','HorizontalAlignment','left')
 text(100,.55,'stimulus offset','Rotation',90,'VerticalAlignment','bottom','HorizontalAlignment','left')
 
-
-%
-
-% middle: decoding over time
+%% middle: decoding over time
 rng(50)
 bottom = 200;
 NexemplarsPerCat = 24;
@@ -40,7 +42,7 @@ y = [y_mu(1)+y_var(1)*randn([NexemplarsPerCat 1]) y_mu(2)+y_var(2)*randn([Nexemp
 
 m = fitcdiscr([x;y],[zeros(length(x),1);ones(length(y),1)]);
 
-a=axes('Units','Pixels','Position',[left bottom 200 200])
+a=axes('Units','Pixels','Position',[left bottom 200 200]);
 h1 = scatter(x(:,1),x(:,2),'ok','MarkerFaceColor',[0.1725,0.6275,0.1725],'MarkerEdgeColor',[0.1725,0.6275,0.1725]);
 hold on
 h2 = scatter(y(:,1),y(:,2),'^k','MarkerFaceColor',[0.8392,0.1529,0.1569],'MarkerEdgeColor',[0.8392,0.1529,0.1569]);
@@ -77,7 +79,7 @@ for i = 1:4
     
     title('train')
     
-    a = axes('Units','Pixels','Position',[left+220+(i-1)*60 bottom+75 50 50])
+    a = axes('Units','Pixels','Position',[left+220+(i-1)*60 bottom+75 50 50]);
     plot(x(train_labels==i,1),x(train_labels==i,2),'ok','MarkerFaceColor',[0.1725,0.6275,0.1725],'MarkerEdgeColor',[0.1725,0.6275,0.1725],'MarkerSize',ms)
     hold on
     plot(y(train_labels==i,1),y(train_labels==i,2),'^k','MarkerFaceColor',[0.8392,0.1529,0.1569],'MarkerEdgeColor',[0.8392,0.1529,0.1569],'MarkerSize',ms)
@@ -109,10 +111,10 @@ for i=1:4
 end
 drawnow
     
-% top: scalp & eeg
+%% top: scalp & eeg
 bottom = 430;
 
-% B
+% Subplot B
 a=axes('Units','Pixels','Position',[left+220 bottom 230 200]);
 
 m=load('dat.mat');dat=m.dat;dat = dat(1:10,:)
@@ -135,7 +137,7 @@ title('Channel voltage over time')
 a.Title.Position(2) = 720;
 a.Title.FontSize = 14;
 
-% A)
+% Subplot A
 
 ax=axes('Units','Pixels','Position',[left-20 bottom-10 200 200]);
 stim = imread('brain_transparent.png');
@@ -156,7 +158,7 @@ text(0.05,0.92, 'MEG sensor / EEG channel','FontSize',12)
 ax.XLim=[0,1];ax.YLim=[0,1];ax.YDir = 'normal';ax.Clipping='off';
 
 
-%% annot
+%% annotations for all subplots
 fs=20;
 a=annotation('textbox','Units','Pixels','Position',[0,540,50,100],'String','A','FontSize',fs,'FontWeight','bold','LineStyle','none');
 a=annotation('textbox','Units','Pixels','Position',[235,540,50,100],'String','B','FontSize',fs,'FontWeight','bold','LineStyle','none');
