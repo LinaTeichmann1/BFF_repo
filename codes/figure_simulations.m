@@ -1,6 +1,7 @@
 %%
 addpath('~/CoSMoMVPA/mvpa/')
 addpath('~/Repository/CommonFunctions/matplotlib/')
+addpath('~/Repository/CommonFunctions/distributionPlot/')
 
 %%
 nboot=1000;
@@ -54,6 +55,7 @@ for aa = [1 3]
     for i=1:2
         plotnr=plotnr+1;
         a=subplot(4,2,plotnr);hold on
+        a.FontSize=12;
         a.YScale = 'log';
         if i==1 
             a.XLim = [2 30];
@@ -77,19 +79,23 @@ for aa = [1 3]
         end
         if i==1
             ylim(10.^[-5+3*(aa>2) 5])
-            a.YTick = 10.^(-5:5);
+            a.YTick = 10.^(-4:4);
         else
             ylim(10.^[-16+14*(aa>2) 16])
             a.YTick = 10.^(-15:3:15);
         end
         xlabel('number of subjects')
-        ylabel('Bayes Factor')
-        title(sprintf('%s Median of 1000 simulations',bf_args{aa}))
+        if mod(plotnr,2)
+            ylabel('Bayes Factor')
+        end
+%         title(sprintf('%s Median of 1000 simulations',bf_args{aa}))
+%         text(.5,.9*a.YLim(end),sprintf('n=%i',(30+(i*70-70))))
         acell{i} = a;
     end
     for i=1:2
         plotnr=plotnr+1;
         a=subplot(4,2,plotnr);hold on
+        a.FontSize=12;
         %a.YScale = 'log';
         
         co = tab10;
@@ -117,15 +123,19 @@ for aa = [1 3]
         if aa<2
             a.YLim = a.YTick([1 end]);
         else
-            a.YLim = [-8 a.YTick([end])];
+            a.YLim = [-8 a.YTick(end)];
         end        
         a.XTick = 1:11;
         a.XTickLabel = flipud(eff);
-        xlabel('effect size (d)')
-        ylabel('Bayes Factor')
-        title(sprintf('%s 1000 simulations at n=%i',bf_args{aa},(30+(i*70-70))))
+        xlabel('effect size (\delta)')
+        if mod(plotnr,2)
+            ylabel('Bayes Factor')
+        end
+        text(.5,.9*a.YLim(end),sprintf('n=%i',(30+(i*70-70))))
     end
 end
+annotation('textbox',[.065,.91,.4,.04],'String','A   With interval','FontSize',17,'FontWeight','bold','LineStyle','none')
+annotation('textbox',[.065,.471,.4,.04],'String','B   Without interval','FontSize',17,'FontWeight','bold','LineStyle','none')
 
 %% save
 fn = sprintf('../figures/figure_simulations');
