@@ -13,7 +13,12 @@ left = 40;
 
 %% bottom: decoding over time
 a=axes('Units','Pixels','Position',[left 30 450 140]);
-m = load('cleardecodingdata.mat');xdata = m.xdata;ydata=m.ydata*100;
+m = load('cleardecodingdata.mat');
+xdata = m.xdata;
+xdata = [xdata 605:5:800]
+ydata=m.ydata*100;
+ydata=[ydata repmat(ydata(end),1,40)-(rand(40,1))']
+
 plot(xdata,ydata,'k','LineWidth',2);hold on
 plot(xdata,50+0*ydata,'k:','LineWidth',2)
 

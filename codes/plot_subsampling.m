@@ -5,6 +5,11 @@
 %   April 2021
 %% Setup
 load('../data_colour/subsampling_results.mat')
+load('../data_colour/ds_stacked_realcolour.mat')
+
+[v_max,i_max]=max(mean(ds_stacked_realcolour.samples))
+
+addpath(genpath('./local_functions'))
 colors = tab10;
 co = colors([3,5,10],:);
 
@@ -26,53 +31,65 @@ p_toplot(:,:,[2,4])=[];
 
 % make plot titles
 plottitles = prct*n_trials;
+plottitles=flip(prct)*n_trials
 plottitles=arrayfun( @(x) [num2str(x) ' trials'],plottitles,'UniformOutput',false);
 
-%% make the plot comparing different data sizes
+%% plot data
 f=figure(1);clf
 f.Position = [f.Position(1:2) 800 800];
+cols=(magma(5))
+for s = 1:size(toplot,3)
+ax=subplot(4,1,s)
 
-% make 5 subplots, each showing Bayes Factors for different # of trials
-% used
-plotnr=0;
-for s = 1:size(toplot,1)
-    plotnr=plotnr+1;
-    a=subplot(5,1,plotnr); hold on
-    % loop over the three different sample sizes
-    for i = 1:size(toplot,3)
-        y = toplot(s,:,i);
-        p_idx = logical(p_toplot(s,:,i));
-        bf_idx = logical(toplot(s,:,i)>0);
-        
-        stem3(tv,i+0*tv,y,'LineWidth',1,'Color',[0.7,0.7,0.7],'LineWidth',1,'Marker','None');
-        stem3(tv(bf_idx),i+0*tv(bf_idx),y(bf_idx),'LineWidth',1,'Color',co(i,:),'LineWidth',1,'Marker','None');
-        plot3(tv,i+0*tv,y,'k.','MarkerFaceColor',[0.7,0.7,0.7],'MarkerSize',6)
-        plot3(tv(bf_idx),i+0*tv(bf_idx),y(bf_idx),'k.','MarkerFaceColor',[0.7,0.7,0.7],'MarkerEdgeColor',co(i,:),'MarkerSize',6)
-        plot3(tv(p_idx),i+0*tv(p_idx),tv(p_idx)*0-3,'k^','MarkerSize',2,'MarkerFaceColor',co(i,:),'MarkerEdgeColor',co(i,:))
-        plot3(tv,i+0*tv,tv*0,'k-') 
-        
-        a.View=[-10,30];
-    end
+for i = 1:size(toplot,1)
+    y = toplot(i,:,s);
+    p_idx = logical(p_toplot(i,:,s));
+    a(i)=area(tv,y,'FaceColor',cols(i,:),'FaceAlpha',0.6,'EdgeColor',cols(i,:)); hold on
+    ylim([-20,20])
     
-    % add tick labels 
-    a.XLabel.String = 'time (ms)';
-    a.ZLabel.String = 'BF';a.ZLabel.Position(3) = 15;a.ZLabel.Position(1) = -180;
-    a.ZTick = [0 10 20]; 
-    a.ZTickLabel=arrayfun(@(x) ['10^{' num2str(x) '}'], a.ZTick, 'UniformOutput', false);
-    a.ZLim = [-10,20];
-    a.YTickLabel = participants;
-    for i = 1:length(a.YTickLabel)
-        ticklabels_new{i} = [['\color[rgb]{' num2str(co(i,:)) '}'],'n = ',num2str(participants(i))];
+    
+    plot(tv(p_idx),-9-i*1.5-1,'.k','Color',cols(i,:),'MarkerSize',10)
+    plot(tv,tv*0,'k','LineWidth',1)
+ 
+end
+    ax.YTick = [-10,0,10,20];
+    ax.YLabel.String = 'BF (log)';
+    ax.YLabel.Position(2) = 10;
+    ax.YLabel.Position(1) = -150;
+    ax.FontSize = 14;
+    ax.Box='off'
+    ax.Title.String = ['n=' num2str(participants(s))]
+    ax.Title.Position(2) = 15;
+    ax.Title.Position(1) = -50;
+
+    t = text(0,-13,'p<0.05','FontSize',12)
+    l=legend(a,{'1600 trials','1200 trials','800 trials','400 trials','160 trials'})
+    
+    if s == 3
+        ax.XLabel.String = 'time (ms)'
     end
-    a.YTickLabel=ticklabels_new;
-    a.FontSize=14;  
-    % add title
-    a.Title.String=plottitles{s};
-    a.Title.Position(1) = tv(1)+50;
-        
 end
 
-%% save
+cols = viridis(3)
+toplot2 = toplot(:,i_max,:);
+toplot2 = squeeze(toplot2);
+ax=axes('Units','normalized','Position',[0.3,0.03,0.6,0.2])
+
+marker_sizes = (100*5):-100:5
+a = [];
+order = [3,2,1]
+for i = 1:3
+        a(order(i))=scatter([1,2,3,4,5],toplot2(:,i),100,'MarkerFaceColor',cols(i,:),'MarkerEdgeColor',cols(i,:),'MarkerFaceAlpha',1);hold on
+    plot([1,2,3,4,5],toplot2(:,i),'Color',[cols(i,:),0.1],'LineWidth',2)
+end
+set(ax,'XLim',[0.5,5.5],'XTick',[1,2,3,4,5],'XTickLabels',{'1600 trials','1200 trials','800 trials','400 trials','160 trials'},'FontSize',14,'YLim',[0,18],'XDir','reverse')
+ylabel('BF (log)')
+l=legend(a,{'n = 18','n = 12','n = 6'})
+l.Location='northeastoutside'
+
+title('Peak decoding (125ms)')
+
+% save
 fn = sprintf('../figures/figure_subsampling');
 tn = tempname;
 print(gcf,'-dpng','-r500',tn)
@@ -81,6 +98,3 @@ im=imread([tn '.png']);
 imwrite(im(min(i-margin):max(i+margin),min(j-margin):max(j+margin),:),[fn '.png'],'png');
 
  
-
-    
-    
