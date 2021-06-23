@@ -31,15 +31,15 @@ p_toplot(:,:,[2,4])=[];
 
 % make plot titles
 plottitles = prct*n_trials;
-plottitles=flip(prct)*n_trials
+plottitles=flip(prct)*n_trials;
 plottitles=arrayfun( @(x) [num2str(x) ' trials'],plottitles,'UniformOutput',false);
 
 %% plot data
 f=figure(1);clf
 f.Position = [f.Position(1:2) 800 800];
-cols=(magma(5))
+cols=(magma(5));
 for s = 1:size(toplot,3)
-ax=subplot(4,1,s)
+ax=subplot(4,1,s);
 
 for i = 1:size(toplot,1)
     y = toplot(i,:,s);
@@ -57,35 +57,35 @@ end
     ax.YLabel.Position(2) = 10;
     ax.YLabel.Position(1) = -150;
     ax.FontSize = 14;
-    ax.Box='off'
-    ax.Title.String = ['n=' num2str(participants(s))]
+    ax.Box='off';
+    ax.Title.String = ['n=' num2str(participants(s))];
     ax.Title.Position(2) = 15;
     ax.Title.Position(1) = -50;
 
-    t = text(0,-13,'p<0.05','FontSize',12)
-    l=legend(a,{'1600 trials','1200 trials','800 trials','400 trials','160 trials'})
+    t = text(0,-13,'p<0.05','FontSize',12);
+    l=legend(a,{'1600 trials','1200 trials','800 trials','400 trials','160 trials'});
     
     if s == 3
-        ax.XLabel.String = 'time (ms)'
+        ax.XLabel.String = 'time (ms)';
     end
 end
 
-cols = viridis(3)
+cols = viridis(3);
 toplot2 = toplot(:,i_max,:);
 toplot2 = squeeze(toplot2);
-ax=axes('Units','normalized','Position',[0.3,0.03,0.6,0.2])
+ax=axes('Units','normalized','Position',[0.3,0.03,0.6,0.2]);
 
-marker_sizes = (100*5):-100:5
+marker_sizes = (100*5):-100:5;
 a = [];
-order = [3,2,1]
+order = [3,2,1];
 for i = 1:3
         a(order(i))=scatter([1,2,3,4,5],toplot2(:,i),100,'MarkerFaceColor',cols(i,:),'MarkerEdgeColor',cols(i,:),'MarkerFaceAlpha',1);hold on
     plot([1,2,3,4,5],toplot2(:,i),'Color',[cols(i,:),0.1],'LineWidth',2)
 end
 set(ax,'XLim',[0.5,5.5],'XTick',[1,2,3,4,5],'XTickLabels',{'1600 trials','1200 trials','800 trials','400 trials','160 trials'},'FontSize',14,'YLim',[0,18],'XDir','reverse')
 ylabel('BF (log)')
-l=legend(a,{'n = 18','n = 12','n = 6'})
-l.Location='northeastoutside'
+l=legend(a,{'n = 18','n = 12','n = 6'});
+l.Location='northeastoutside';
 
 title('Peak decoding (125ms)')
 
