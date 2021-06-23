@@ -57,6 +57,7 @@ for aa = [1 3]
         a=subplot(4,2,plotnr);hold on
         a.FontSize=12;
         a.YScale = 'log';
+        a.YAxis.MinorTick='off';
         if i==1 
             a.XLim = [2 30];
         else
@@ -69,12 +70,8 @@ for aa = [1 3]
             idx = efs_real(1,:)==e;
             x = squeeze(bfs_sim(aa,:,idx))';
             mu = median(x);
-            ci = [min(x);max(x)];
-            %fill([nsubvec,fliplr(nsubvec)],[ci(1,:) fliplr(ci(2,:))],co(e,:),'FaceAlpha',.2,'LineStyle','none');
             ci = prctile(x,[5 95]);
-            %fill([nsubvec,fliplr(nsubvec)],[ci(1,:) fliplr(ci(2,:))],co(e,:),'FaceAlpha',.1,'LineStyle','none');
             h(e) = plot(nsubvec,mu,'Color',co(e,:),'LineWidth',2,'DisplayName',sprintf('d=%.2f',eff(e)));
-            %h(e,:) = plot(repmat(nsubvec,size(x,1),1),x,'.','Color',co(e,:));
             text(nsubvec(a.XLim(2)),mu(a.XLim(2)),sprintf('d=%.1f',eff(e)),'Color',co(e,:))
         end
         if i==1
@@ -88,15 +85,12 @@ for aa = [1 3]
         if mod(plotnr,2)
             ylabel('Bayes Factor')
         end
-%         title(sprintf('%s Median of 1000 simulations',bf_args{aa}))
-%         text(.5,.9*a.YLim(end),sprintf('n=%i',(30+(i*70-70))))
         acell{i} = a;
     end
     for i=1:2
         plotnr=plotnr+1;
         a=subplot(4,2,plotnr);hold on
         a.FontSize=12;
-        %a.YScale = 'log';
         
         co = tab10;
         h=[];
@@ -108,7 +102,6 @@ for aa = [1 3]
             y(:,e) = squeeze(bfs_sim(aa,nsubvec==(30+(i*70-70)),idx))';
         end
         for e=1:numel(eff)
-            %plot(12-e+linspace(-.4,.4,1000)',fliplr(y(:,e)),'.','Color',co(e,:))
             h=distributionPlot(log(y(:,e)),'addSpread',0,...
                 'xValues',12-e,'color',co(e,:),'showMM',3);
             h{2}.Marker='+';
