@@ -11,7 +11,8 @@
 % medium = sqrt(2) / 2
 % wide = 1
 % ultrawide = sqrt(2)
-
+%
+% EXAMPLE: calc_bf(X, 0.5, [0.5, Inf], sqrt(2))
 function bf = calc_bf(X, nullvalue, nullinterval, rscale)
 
 
