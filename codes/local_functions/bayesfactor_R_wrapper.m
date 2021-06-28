@@ -59,7 +59,7 @@ function bf = bayesfactor_R_wrapper(data,varargin)
     opt.returnindex=1;
     opt.args='';
     opt.verbose=false;
-    opt.tempdir='';
+    opt.tempdir=tempdir;
     % read input key-value pairs and overwrite the default values
     fnames = varargin(1:2:end);
     fvalues = varargin(2:2:end);
@@ -70,27 +70,19 @@ function bf = bayesfactor_R_wrapper(data,varargin)
     end
     
     %% check inputs
-    assert(ischar(opt.Rpath),'value for ''Rpath'' must be a character array')
-    assert(ischar(opt.tempdir),'value for ''tempdir'' must be a character array')
-    assert(ischar(opt.args),'value for ''args'' must be a character array')
+    assert(ischar(opt.Rpath),'value for ''Rpath'' must be a string')
+    assert(ischar(opt.tempdir),'value for ''tempdir'' must be a string')
+    assert(ischar(opt.args),'value for ''args'' must be a string')
     assert(ismember(opt.returnindex,[1 2]),'value for ''returnindex'' must be 1 or 2')
     
-    %% test if calling Rscript
-    cmd = sprintf('which %s',opt.Rpath);
-    [status,output]=system(cmd);
-    if opt.verbose
-        disp(output)
-    end
-    if status
-        error('%s \n R not found',output)
+    %% test if path to Rscript exists
+    if ~isfile(opt.Rpath)
+        error('Rscript not found at: %s \n Try setting opt.Rpath',opt.Rpath)
     end
     
     %% create some temporary filenames
-    if isempty(opt.tempdir)
-        bfstatstempdir = tempdir;
-    else
-        bfstatstempdir = opt.tempdir;
-    end
+    bfstatstempdir = fullfile(opt.tempdir,tempname);
+    mkdir(bfstatstempdir)
     bfstatsinfn = [bfstatstempdir 'in.csv'];
     bfstatsoutfn = [bfstatstempdir 'out.csv'];
     bfscriptfn = [bfstatstempdir 'bf_fun.r'];
