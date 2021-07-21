@@ -92,8 +92,6 @@ title('Peak decoding (125ms)')
 annotation('textbox',[.025,.91,.4,.04],'String','A','FontSize',20,'FontWeight','bold','LineStyle','none')
 annotation('textbox',[.25,.22,.4,.04],'String','B','FontSize',20,'FontWeight','bold','LineStyle','none')
 
-
-
 % save
 fn = sprintf('../figures/figure_subsampling');
 tn = tempname;
