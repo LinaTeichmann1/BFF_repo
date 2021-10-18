@@ -58,7 +58,7 @@ function bf = bayesfactor_R_wrapper(data,varargin)
     opt.Rpath='/usr/local/bin/Rscript';
     opt.returnindex=1;
     opt.args='';
-    opt.verbose=false;
+    opt.verbose=true;
     opt.tempdir=tempdir;
     % read input key-value pairs and overwrite the default values
     fnames = varargin(1:2:end);
@@ -74,6 +74,9 @@ function bf = bayesfactor_R_wrapper(data,varargin)
     assert(ischar(opt.tempdir),'value for ''tempdir'' must be a string')
     assert(ischar(opt.args),'value for ''args'' must be a string')
     assert(ismember(opt.returnindex,[1 2]),'value for ''returnindex'' must be 1 or 2')
+    assert(size(data,2)>1,'the input data should have multiple observations')
+    assert(all(any(data')),'the input data contains rows that are all zero or nan')
+    assert(all(std(data,[],2)),'the input data contains rows with zero variance')
     
     %% test if path to Rscript exists
     if ~isfile(opt.Rpath)
@@ -116,4 +119,5 @@ function bf = bayesfactor_R_wrapper(data,varargin)
         x = readtable(bfstatsoutfn);
         bf = x.BF10;
     end
+    assert(size(bf,1)==size(data,1),'R output did not match the data input size. Something went wrong.')
     
