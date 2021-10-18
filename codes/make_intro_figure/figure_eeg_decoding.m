@@ -129,11 +129,11 @@ a.XTick=[];a.YTick=[];
 
 stim_onsets = linspace(a.XLim(1),a.XLim(end),7);
 hold on
-stim_n = ['01';'13';'05';'03';'15';'13'];
+stim_n = ['01';'11'];
 x_y_ratio = (a.YLim(end)-a.YLim(1))/(a.XLim(end)-a.XLim(1));
 stimsize = 150;
 for i  = 1:length(stim_onsets)-2
-    stim = imread(['./stimuli/' stim_n(i,:) '.png']);
+    stim = imread(['./stimuli/' stim_n(randsample([2,1],1),:) '.png']);
     image(flipud(stim), 'XData', [stim_onsets(i+1)-stimsize/x_y_ratio/2 stim_onsets(i+1)+stimsize/x_y_ratio/2], 'YData', [a.YLim(1)+10 a.YLim(1)+stimsize])
     plot([stim_onsets(i+1),stim_onsets(i+1)],[a.YLim(end)-100,a.YLim(1)+130],'Color',[0.5,0.5,0.5],'LineWidth',2)
 end

@@ -7,6 +7,7 @@
 load('../data_colour/subsampling_results.mat')
 load('../data_colour/ds_stacked_realcolour.mat')
 load('../data_colour/bfs_stoppingrule.mat')
+n_participants = 18; 
 
 [v_max,i_max]=max(mean(ds_stacked_realcolour.samples))
 
@@ -35,14 +36,13 @@ plottitles = prct*n_trials;
 plottitles=flip(prct)*n_trials;
 plottitles=arrayfun( @(x) [num2str(x) ' trials'],plottitles,'UniformOutput',false);
 
-% plot data
+%% plot data
 f=figure(1);clf
 f.Position = [f.Position(1:2) 800 800];
 cols=(magma(5));
 for s = 1:size(toplot,3)
 ax=subplot(4,1,s);
 ax.Position(1) = 0.13;
-ax.Position(2) = ax.Position(2) +0.05;
 for i = 1:size(toplot,1)
     y = toplot(i,:,s);
     p_idx = logical(p_toplot(i,:,s));
@@ -56,6 +56,7 @@ for i = 1:size(toplot,1)
 end
     ax.YTick = [-10,0,10,20];
     ax.YLabel.String = 'BF (log)';
+%     ax.YLabel.Position(1) = -150;
     ax.FontSize = 14;
     ax.Box='off';
     ax.Title.String = ['n=' num2str(participants(s))];
@@ -73,7 +74,7 @@ end
 cols = viridis(3);
 toplot2 = toplot(:,i_max,:);
 toplot2 = squeeze(toplot2);
-ax=axes('Units','normalized','Position',[0.13,0.08,0.33,0.2]);
+ax=axes('Units','normalized','Position',[0.13,0.05,0.35,0.2]);
 
 marker_sizes = (100*5):-100:5;
 a = [];
@@ -91,10 +92,10 @@ l.Location='northwest';
 
 title('Peak decoding (125ms)')
 
+annotation('textbox',[.025,.91,.4,.04],'String','A','FontSize',20,'FontWeight','bold','LineStyle','none')
+annotation('textbox',[.025,.22,.4,.04],'String','B','FontSize',20,'FontWeight','bold','LineStyle','none')
 
 % C
-n_participants = 5:18;
-
 cols=(magma(5));
 
 toplot=[];
@@ -104,36 +105,35 @@ for t = 1:size(bf_all,1)
     toplot(:,t)=squeeze(mean(y<1/criterion | y>criterion,2));
 end
 
-ax=axes('Units','normalized','Position',[0.575,0.08,0.33,0.2]);
+ax=axes('Units','normalized','Position',[0.55,0.05,0.35,0.2]);
 hold on;
 
 plot(n_participants,n_participants*0+80,'k--','LineWidth',1)
 
+col_idx=1:5;
 for i = 1:length(col_idx)
-    a(i)=plot(n_participants,toplot(:,i)*100,'Color',[cols(i,:),0.8],'LineWidth',2);
+    a(i)=plot(n_participants,toplot(:,i)*100,'Color',[cols(col_idx(i),:),0.8],'LineWidth',2);
 end
 
 xlim([n_participants(1),n_participants(end)]);
-ylim([30,99]);
+ylim([50,100]);
 
+% l=legend(a,{'1600 trials','800 trials','160 trials'});
 l=legend(a,{'1600 trials','1200 trials','800 trials','400 trials','160 trials'},'Location','northwest');
-l.Location='southeast';
+
 ax= gca();
 
-ax.YLabel.String = '% BF>6 or BF<1/6';
+ax.YLabel.String = 'Timepoints fulfilling BF criterion (%)';
 ax.XLabel.String = '# of participants';
 
 ax.FontSize = 14;
 ax.Box='off';
 
-text(5.1,87,{'example pre-defined'; 'stopping point'},'FontSize',12)
+text(5.1,79,'pre-defined cut-off','FontSize',12)
 
 
-annotation('textbox',[.06,.96,.4,.04],'String','A','FontSize',20,'FontWeight','bold','LineStyle','none')
-annotation('textbox',[.06,.27,.4,.04],'String','B','FontSize',20,'FontWeight','bold','LineStyle','none')
-annotation('textbox',[.505,.27,.4,.04],'String','C','FontSize',20,'FontWeight','bold','LineStyle','none')
 
-% save
+%% save
 fn = sprintf('../figures/figure_subsampling');
 tn = tempname;
 print(gcf,'-dpng','-r500',tn)

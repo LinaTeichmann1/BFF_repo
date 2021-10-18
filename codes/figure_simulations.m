@@ -39,10 +39,10 @@ for a = 1:numel(bf_args)
     end
 end
 fprintf('\nFinished\n');
-save('bf_simulations.mat','bf_args','eff','bfs_sim','efs_real','efs_sim','nsubvec');
+save('../data_colour/bf_simulations.mat','bf_args','eff','bfs_sim','efs_real','efs_sim','nsubvec');
 
 %% plot simulations
-load('bf_simulations.mat');
+load('../data_colour/bf_simulations.mat');
 
 f=figure(2);clf
 f.Position = [f.Position(1:2) 800 1000];f.Resize='off';
@@ -75,10 +75,12 @@ for aa = [1 3]
             text(nsubvec(a.XLim(2)),mu(a.XLim(2)),sprintf('d=%.1f',eff(e)),'Color',co(e,:))
         end
         if i==1
-            ylim(10.^[-5+3*(aa>2) 5])
+            %ylim(10.^[-5+3*(aa>2) 5])
+            ylim(10.^[-5 5])
             a.YTick = 10.^(-4:4);
         else
-            ylim(10.^[-16+14*(aa>2) 16])
+            %ylim(10.^[-16+14*(aa>2) 16])
+            ylim(10.^[-16 16])
             a.YTick = 10.^(-15:3:15);
         end
         xlabel('number of subjects')
@@ -113,11 +115,12 @@ for aa = [1 3]
             a.YTick = -40:10:60;
         end
         a.YTickLabel = sprintf('10^{%i}\n',a.YTick);
-        if aa<2
-            a.YLim = a.YTick([1 end]);
-        else
-            a.YLim = [-8 a.YTick(end)];
-        end        
+        a.YLim = a.YTick([1 end]);
+%         if aa<2
+%             a.YLim = a.YTick([1 end]);
+%         else
+%             a.YLim = [-8 a.YTick(end)];
+%         end        
         a.XTick = 1:11;
         a.XTickLabel = flipud(eff);
         xlabel('effect size (\delta)')

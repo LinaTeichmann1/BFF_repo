@@ -29,7 +29,7 @@ end
 f=figure(1);clf
 f.Position=[f.Position(1:2) 1000 400];f.Resize='off';f.PaperPositionMode='auto';f.Color='w';
 top = 300; bot = 60;
-a=axes('Units','Pixels','Position',[55 bot 700 top]); hold on
+a=axes('Units','Pixels','Position',[85 bot 700 top]); hold on
 markers=['-d';'-s';'-o';'-^'];
 null_ints_titles={'ultrawide (r = 1.414)','wide (r = 1)','medium (r = 0.707)'};
 
@@ -53,7 +53,7 @@ x_ax_on=0;
 null_int_start=0.5;
 widths = [sqrt(2),1,1/sqrt(2)];
 for i = 1:size(bfs,2)
-    ax=axes('Units','Pixels','Position',[780 top-(i-1)*size_tiny_plots-18*i size_tiny_plots*2 size_tiny_plots ]);    
+    ax=axes('Units','Pixels','Position',[820 top-(i-1)*size_tiny_plots-18*i size_tiny_plots*2 size_tiny_plots ]);    
     prior_width=widths(i);
     if i == 3
         x_ax_on=1;
