@@ -1,7 +1,10 @@
 %%
+% https://www.cosmomvpa.org/
 addpath('~/CoSMoMVPA/mvpa/')
+% https://au.mathworks.com/matlabcentral/fileexchange/62729-matplotlib-perceptually-uniform-colormaps
 addpath('~/Repository/CommonFunctions/matplotlib/')
-addpath('~/Repository/CommonFunctions/distributionPlot/')
+% https://au.mathworks.com/matlabcentral/fileexchange/23661-violin-plots-for-plotting-multiple-distributions-distributionplot-m
+addpath('~/Repository/CommonFunctions/distributionPlot/') 
 
 %%
 nboot=1000;
@@ -11,9 +14,7 @@ efs_real=[];efs_sim=[];
 tdd = tempdir;
 bfs_sim = [];
 bf_args = { 'mu=0,rscale="medium",nullInterval=c(0.5,Inf)',...
-            'mu=0,rscale="ultrawide",nullInterval=c(0.5,Inf)',...
-            'mu=0,rscale="medium",nullInterval=c(0,Inf)',...
-            'mu=0,rscale="ultrawide",nullInterval=c(0,Inf)'};
+            'mu=0,rscale="medium",nullInterval=c(0,Inf)'};
 for a = 1:numel(bf_args)
     fprintf('Simulating %s\n',bf_args{a});
     fprintf('Distributing tasks in tempdir: %s\n',tdd);
@@ -39,10 +40,10 @@ for a = 1:numel(bf_args)
     end
 end
 fprintf('\nFinished\n');
-save('../data_colour/bf_simulations.mat','bf_args','eff','bfs_sim','efs_real','efs_sim','nsubvec');
+save('bf_simulations.mat','bf_args','eff','bfs_sim','efs_real','efs_sim','nsubvec');
 
 %% plot simulations
-load('../data_colour/bf_simulations.mat');
+load('bf_simulations.mat');
 
 f=figure(2);clf
 f.Position = [f.Position(1:2) 800 1000];f.Resize='off';
@@ -50,7 +51,7 @@ plotnr = 0;
 
 bf_args = {'interval = [0.5,Inf]','','interval = [0,Inf]'};
 
-for aa = [1 3]
+for aa = [1 2]
     acell = {};
     for i=1:2
         plotnr=plotnr+1;
@@ -64,6 +65,14 @@ for aa = [1 3]
             a.XLim = [30 99];
         end
         co = tab10;
+        if i==1
+            ylim(10.^[-5+3*(aa>2) 5])
+            a.YTick = 10.^(-4:4);
+        else
+            ylim(10.^[-16+14*(aa>2) 16])
+            a.YTick = 10.^(-15:3:15);
+        end
+        
         h=[];
         fill([a.XLim fliplr(a.XLim)],reshape(([1/10 10]'+0*a.XLim)',[],1),'k','FaceAlpha',.3,'LineStyle','none');
         for e=1:numel(eff)
@@ -72,16 +81,9 @@ for aa = [1 3]
             mu = median(x);
             ci = prctile(x,[5 95]);
             h(e) = plot(nsubvec,mu,'Color',co(e,:),'LineWidth',2,'DisplayName',sprintf('d=%.2f',eff(e)));
-            text(nsubvec(a.XLim(2)),mu(a.XLim(2)),sprintf('d=%.1f',eff(e)),'Color',co(e,:))
-        end
-        if i==1
-            %ylim(10.^[-5+3*(aa>2) 5])
-            ylim(10.^[-5 5])
-            a.YTick = 10.^(-4:4);
-        else
-            %ylim(10.^[-16+14*(aa>2) 16])
-            ylim(10.^[-16 16])
-            a.YTick = 10.^(-15:3:15);
+            if aa==1 || mod(e,2)
+                text(nsubvec(a.XLim(2)),mu(a.XLim(2)),sprintf('d=%.1f',eff(e)),'Color',co(e,:))
+            end
         end
         xlabel('number of subjects')
         if mod(plotnr,2)
@@ -115,12 +117,9 @@ for aa = [1 3]
             a.YTick = -40:10:60;
         end
         a.YTickLabel = sprintf('10^{%i}\n',a.YTick);
+        
         a.YLim = a.YTick([1 end]);
-%         if aa<2
-%             a.YLim = a.YTick([1 end]);
-%         else
-%             a.YLim = [-8 a.YTick(end)];
-%         end        
+        
         a.XTick = 1:11;
         a.XTickLabel = flipud(eff);
         xlabel('effect size (\delta)')
