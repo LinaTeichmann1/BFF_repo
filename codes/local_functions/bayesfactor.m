@@ -41,7 +41,8 @@ function [bf, bf_complement] = bayesfactor(X, varargin)
     
     % summary stats
     n = size(X, 2);
-    mu = mean(X - opt.nullvalue, 2);
+    X = X - opt.nullvalue;
+    mu = mean(X, 2);
     sd = std(X, 0, 2);
     se = sd / sqrt(n);
     t = mu ./ se;
