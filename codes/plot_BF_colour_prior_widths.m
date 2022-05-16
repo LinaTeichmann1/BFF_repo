@@ -19,12 +19,29 @@ load('color_gray.mat');
 
 % calculate Bayes Factors
 X = ds_stacked_realcolour.samples';
-prior_widths = {'ultrawide';'wide';'medium'};
+%prior_widths = {2;1;0.707};
+prior_widths = {sqrt(2); 1; sqrt(2)/2};
+prior_widthstxt = {'ultrawide';'wide';'medium'};
+bfs_o = cell(1,size(prior_widths,1));
 bfs = cell(1,size(prior_widths,1));
+tic;
 for i = 1:size(bfs,2)
-    bfs{i} =bayesfactor_R_wrapper(X,'args',['mu=0.5,rscale="' prior_widths{i} '",nullInterval=c(0.5,Inf)'],'returnindex',1);
+  bfs_o{i} =bayesfactor_R_wrapper(X,'args',['mu=0.5,rscale="' prior_widthstxt{i} '",nullInterval=c(0.5,Inf)'],'returnindex',1);
 end
-
+toc
+tic;
+for i = 1:size(bfs,2)
+  m =  mean(X,2) - 0.5;
+  s = std(X',0);
+  d = m' ./ s;
+  n = repmat(size(X,2),1, size(X,1));
+  location = repmat(0,1,size(X,1));
+  scale = repmat(prior_widths{i},1,size(X,1));
+  ll = repmat(0.5,1,size(X,1));
+  ul = repmat(Inf,1,size(X,1));
+  bfs{i} = BayesFactor(d', n', location', scale', ll', ul');
+end
+toc
 %% make the plot comparing different prior widths
 f=figure(1);clf
 f.Position=[f.Position(1:2) 1000 400];f.Resize='off';f.PaperPositionMode='auto';f.Color='w';
@@ -72,7 +89,7 @@ tn = tempname;
 print(gcf,'-dpng','-r500',tn)
 im = imread([tn '.png']);
 [i,j]=find(mean(im,3)<255);margin=1;
-imwrite(im(min(i-margin):max(i+margin),min(j-margin):max(j+margin),:),[fn '.png'],'png');
+%imwrite(im(min(i-margin):max(i+margin),min(j-margin):max(j+margin),:),[fn '.png'],'png');
 
 
 
